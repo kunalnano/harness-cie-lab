@@ -70,7 +70,7 @@ pipeline:
                                     connectorRef: account.bootcampdockerhub
                                     repo: nikpap/payment-service
                                     tags:
-                                        - -latest
+                                        - <githubid>-latest
                                     dockerfile: /harness/payment-service/Dockerfile
                                     optimize: true
                                     resources:
