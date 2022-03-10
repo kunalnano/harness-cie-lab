@@ -77,3 +77,4 @@ pipeline:
                                         limits:
                                             memory: 1Gi
                                             cpu: "1"
+              variables: []
