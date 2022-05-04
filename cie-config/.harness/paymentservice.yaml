@@ -1,20 +1,21 @@
 pipeline:
     name: payment-service
     identifier: paymentservice
-    projectIdentifier: bootcampcieal
+    allowStageExecutions: false
+    projectIdentifier: bootcampcieals
     orgIdentifier: default
     tags: {}
     properties:
         ci:
             codebase:
-                connectorRef: bootcampkunalnano
+                connectorRef: algithub
                 repoName: harness-cie-lab
                 build: <+input>
     stages:
         - stage:
               name: Build
               identifier: Build
-              description: ""
+              description: build harness-cie-lab
               type: CI
               spec:
                   cloneCodebase: true
@@ -55,9 +56,8 @@ pipeline:
                                     connectorRef: account.bootcampdockerhub
                                     image: nikpap/mvn-openjdk-8:harness
                                     command: |
-                                        cd payment-service
+                                        cd payment-service 
                                         mvn -Dmaven.test.skip=true clean install -X
-                                    privileged: false
                                     resources:
                                         limits:
                                             memory: 1Gi
@@ -70,94 +70,10 @@ pipeline:
                                     connectorRef: account.bootcampdockerhub
                                     repo: nikpap/payment-service
                                     tags:
-                                        - 9090916-latest
+                                        - kunalnano-latest
                                     dockerfile: /harness/payment-service/Dockerfile
                                     optimize: true
                                     resources:
                                         limits:
                                             memory: 1Gi
                                             cpu: "1"
-              variables: []
-        - stage:
-              name: DeployDev
-              identifier: DeployDev
-              description: ""
-              type: Deployment
-              spec:
-                  serviceConfig:
-                      serviceRef: paymentservice
-                      serviceDefinition:
-                          type: Kubernetes
-                          spec:
-                              variables: []
-                              manifests:
-                                  - manifest:
-                                        identifier: values
-                                        type: Values
-                                        spec:
-                                            store:
-                                                type: Github
-                                                spec:
-                                                    connectorRef: bootcampkunalnano
-                                                    gitFetchType: Branch
-                                                    paths:
-                                                        - harness-deploy/values.yaml
-                                                    repoName: harness-cie-lab
-                                                    branch: main
-                                  - manifest:
-                                        identifier: templates
-                                        type: K8sManifest
-                                        spec:
-                                            store:
-                                                type: Github
-                                                spec:
-                                                    connectorRef: bootcampkunalnano
-                                                    gitFetchType: Branch
-                                                    paths:
-                                                        - harness-deploy/payment-service-dev
-                                                    repoName: harness-cie-lab
-                                                    branch: main
-                                            skipResourceVersioning: false
-                              artifacts:
-                                  primary:
-                                      type: DockerRegistry
-                                      spec:
-                                          connectorRef: account.bootcampdockerhub
-                                          imagePath: nikpap/payment-service
-                                          tag: 9090916-latest
-                  infrastructure:
-                      environmentRef: GKEDEV
-                      infrastructureDefinition:
-                          type: KubernetesDirect
-                          spec:
-                              connectorRef: account.bootcampgkecluster
-                              namespace: payment-service-dev
-                              releaseName: release-<+INFRA_KEY>
-                      allowSimultaneousDeployments: false
-                  execution:
-                      steps:
-                          - step:
-                                name: Rollout Deployment
-                                identifier: rolloutDeployment
-                                type: K8sRollingDeploy
-                                timeout: 10m
-                                spec:
-                                    skipDryRun: false
-                      rollbackSteps:
-                          - step:
-                                name: Rollback Rollout Deployment
-                                identifier: rollbackRolloutDeployment
-                                type: K8sRollingRollback
-                                timeout: 10m
-                                spec: {}
-              tags: {}
-              failureStrategies:
-                  - onFailure:
-                        errors:
-                            - AllErrors
-                        action:
-                            type: StageRollback
-    variables:
-        - name: seusername
-          type: String
-          value: <+input>
