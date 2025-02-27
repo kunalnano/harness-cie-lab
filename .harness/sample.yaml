@@ -1,0 +1,25 @@
+service:
+  name: sample
+  identifier: sample
+  serviceDefinition:
+    type: Kubernetes
+    spec:
+      manifests:
+        - manifest:
+            identifier: manifest
+            type: K8sManifest
+            spec:
+              store:
+                type: Github
+                spec:
+                  connectorRef: test_al
+                  gitFetchType: Branch
+                  paths:
+                    - manifest.yaml
+                  repoName: cd_lab_qbr
+                  branch: main
+              skipResourceVersioning: false
+              enableDeclarativeRollback: false
+  gitOpsEnabled: false
+  orgIdentifier: TPMLabs
+  projectIdentifier: testal
